@@ -83,18 +83,25 @@ feature-flagged and off by default, so the classic single-attacker loop is the b
 ## Quickstart
 
 ```bash
-# 0. Python >= 3.12 (recommended: venv)
-#    On this machine a ready venv lives at: /home/vijay/venvs/autoredteam
-#    source /home/vijay/venvs/autoredteam/bin/activate
-#    # or: python3.12 -m venv .venv && source .venv/bin/activate
+# 0. Use Windows Python 3.12+ (python3.exe). Create a local venv:
+python3.exe -m venv .venv
+# PowerShell:  .\.venv\Scripts\Activate.ps1
+# cmd:         .venv\Scripts\activate.bat
+# WSL:         .venv/Scripts/python.exe  (or activate via Scripts/activate)
 
 # 1. Install (CPU-only core; real providers are optional extras)
-pip install -e ".[dev]"
+python3.exe -m pip install -e ".[dev]"
+# with venv active:
+#   pip install -e ".[dev]"
+#   # or without activate:
+#   .venv\Scripts\python.exe -m pip install -e ".[dev]"
 
 # 2. Run the offline default -- MOCK attacker vs MOCK defender, no API keys, no GPU.
 #    (The mock defender refuses obviously-unsafe asks and complies otherwise, so the
 #    harness, judges, metrics, and reports are all exercised end-to-end offline.)
 auto-redteam run
+# or:  .venv\Scripts\auto-redteam.exe run
+# or:  python3.exe -m pytest tests/   (for tests)
 
 # 3. Preview the attacker/strategy loop WITHOUT calling any defender:
 auto-redteam run --dry-run
