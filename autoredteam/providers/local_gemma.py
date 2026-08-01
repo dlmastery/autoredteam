@@ -32,7 +32,12 @@ class LocalGemmaProvider(BaseProvider):
         if self.cfg.api_key_env:
             headers = {"Authorization": f"Bearer {self._require_api_key()}"}
 
-        client = AsyncClient(host=self.cfg.base_url, headers=headers)
+        # Ollama's native host is e.g. http://localhost:11434 (no /v1 suffix).
+        # Campaign YAMLs sometimes use the OpenAI-compat form (.../v1); normalize.
+        host = (self.cfg.base_url or "http://localhost:11434").rstrip("/")
+        if host.endswith("/v1"):
+            host = host[:-3]
+        client = AsyncClient(host=host, headers=headers)
         resp = await client.chat(
             model=self.cfg.model,
             messages=self._to_openai_messages(messages),

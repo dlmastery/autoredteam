@@ -77,6 +77,39 @@ feature-flagged and off by default, so the classic single-attacker loop is the b
 |-----|----------|
 | [`ARCHITECTURE.md`](ARCHITECTURE.md) | Component design, protocols, data flow |
 | [`docs/SOTA_AUTO_REDTEAM_JULY_2026.md`](docs/SOTA_AUTO_REDTEAM_JULY_2026.md) | State-of-the-art survey (through July 2026): universal jailbreaks, auto red-team techniques, classifier training data, and LLM hardening |
+| [`dashboard/index.html`](dashboard/index.html) | Educational local Gemma-4B campaign dashboard (100 canary items) |
+
+---
+
+## Local educational campaign (Gemma-4B ablated → official)
+
+Small-model lab exercise: **ablated/uncensored Gemma-4B** attacker vs **official Gemma-4B** defender via Ollama. Generates **100 unique** labelled items (55 regular + 45 universal scaffolds) for jailbreak-classification training. Success = unique canary token emitted (no real harmful payloads).
+
+```bash
+# Prerequisites: Ollama running; python3.exe venv with package installed
+# Models pulled automatically on first run (or):
+#   ollama pull gemma4:e4b
+#   ollama pull huihui_ai/gemma-4-abliterated:e4b
+
+python3.exe -m pip install -e ".[dev,local]"
+.venv\Scripts\python.exe scripts/run_local_gemma4b_edu.py
+
+# Smoke (3 goals):
+.venv\Scripts\python.exe scripts/run_local_gemma4b_edu.py --limit 3
+
+# Re-export dataset + dashboard from an existing run:
+.venv\Scripts\python.exe scripts/export_dataset_and_dashboard.py --run-dir runs/local-gemma4b-edu-100
+```
+
+| Output | Path |
+|--------|------|
+| Run artifacts | `runs/local-gemma4b-edu-100/` |
+| Dataset (JSON/JSONL/CSV) | `datasets/edu_100_items.*` |
+| Interactive dashboard | `dashboard/index.html` |
+| Goals | `config/goals_edu_100.yaml` |
+| Campaign config | `config/campaigns/local_gemma4b_edu.yaml` |
+
+**Latest local run (educational):** ASR ≈ **53%** (53/100 canary hits); regular 38/55, universal 15/45.
 
 ---
 

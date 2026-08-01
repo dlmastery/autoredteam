@@ -212,9 +212,11 @@ class Orchestrator:
         else:
             from .defender import Defender  # lazy (sibling, but ours)
 
+            from .config import resolve_system_prompt  # lazy
+
             ctx.defender = Defender(
                 provider_factory(cfg.defender),
-                system_prompt=cfg.defender.system_prompt,
+                system_prompt=resolve_system_prompt(cfg.defender),
                 tools=cfg.defender.tools,
             )
 
@@ -229,9 +231,15 @@ class Orchestrator:
             else:
                 from .attacker import Attacker  # lazy (ours)
 
+                from .config import resolve_system_prompt  # lazy
+
+                # author_with_provider=False keeps strategy/seed text verbatim
+                # (important for educational canary probes that must not be rewritten).
+                author = bool(cfg.attacker.extra.get("author_with_provider", True))
                 ctx.attacker = Attacker(
                     provider_factory(cfg.attacker),
-                    system_prompt=cfg.attacker.system_prompt,
+                    system_prompt=resolve_system_prompt(cfg.attacker),
+                    author_with_provider=author,
                 )
 
         # -- run-scoped scheduling state --

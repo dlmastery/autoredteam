@@ -26,7 +26,11 @@ class OpenAICompatibleProvider(BaseProvider):
                 "openai is not installed. Run `pip install auto-redteam[openai]`."
             ) from exc
 
-        api_key = self._require_api_key()
+        # Local OpenAI-compat servers (Ollama, vLLM, LM Studio) often need no real key.
+        if self.cfg.api_key_env:
+            api_key = self._require_api_key()
+        else:
+            api_key = "local-no-key"
         client = AsyncOpenAI(api_key=api_key, base_url=self.cfg.base_url)
 
         resp = await client.chat.completions.create(
