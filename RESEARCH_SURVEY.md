@@ -7,6 +7,7 @@
 ---
 
 > **Location note:** Canonical copy lives at [`docs/SOTA_AUTO_REDTEAM_JULY_2026.md`](docs/SOTA_AUTO_REDTEAM_JULY_2026.md).  
+> Companion paper list: [`docs/RELATED_WORK_PAPERS.md`](docs/RELATED_WORK_PAPERS.md).  
 > This root-level file is the same survey for easy discovery.
 
 
@@ -54,8 +55,14 @@ This survey prioritizes methods that scale **A** and **B**, with special attenti
 2. **2024–2025 — Composition, multi-turn, scale**  
    WildTeaming / WildJailbreak, Crescendo, TAP, GOAT, Best-of-N, HarmBench / JailbreakBench standardization.
 
-3. **2025–July 2026 — Learning over attack space + LRM agents + classifier hardening loops**  
-   Adaptive Instruction Composition (bandits over WildJailbreak), AutoDAN-Turbo lifelong tactics, CoP (composition-of-principles agents), HASTE hard-negative detector training, LRM-as-jailbreak-agent (~97% multi-model ASR), MLCommons mechanism-first jailbreak taxonomy, multimodal universals (UltraBreak ICLR 2026).
+3. **2025–July 2026 — Learning over attack space + lifelong agents + production-agent autoresearch**  
+   Adaptive Instruction Composition (bandits over WildJailbreak), AutoDAN-Turbo lifelong tactics, **Auto-RT** (RL strategy exploration), **AutoRedTeamer** (multi-agent + memory-guided lifelong attack integration), **CoP**, HASTE hard-negative detector training, LRM-as-jailbreak-agent (~97% multi-model ASR), **AHA / Agent Hacks Agent** (autoresearch for *production agents*, Vulnerability Concept Graph), Jailbreak-autoresearch evolutionary loops, MLCommons mechanism-first jailbreak taxonomy, multimodal universals (UltraBreak ICLR 2026).
+
+> **Name disambiguation (important):**  
+> - **This local repo** (`steeringresearch/auto-redteam` → `~/autoredteam`) is an *educational* harness for chat LLM canary red-teaming and classifier data.  
+> - **AutoRedTeamer** (Zhou et al., arXiv:2503.15754) is a *different* published multi-agent system with lifelong attack memory.  
+> - **AHA / Auto-research-red-teaming** (Mao et al., arXiv:2607.11698; GitHub `henrymao2004/...`) targets *production coding agents* (Claude Code, Codex), not the same codebase.  
+> Searching the web for “auto red team” will surface those papers—not this private/local project.
 
 ---
 
@@ -146,7 +153,22 @@ SOTA upgrade on WildTeaming for **targeted data generation**:
 
 **Data value:** each failed/succeeded augmentation is a free **label** for invariance training of detectors (“same intent, different surface form”). Cheap negative/positive mining at scale.
 
-### 3.6 Large reasoning models as autonomous red-team agents (2026 shift)
+### 3.6 Lifelong / RL / multi-agent auto red-team systems (2025–2026 SOTA wave)
+
+These systems go beyond a fixed strategy menu: they **search, store, and reuse** attack knowledge.
+
+| System | Venue / ID | Core idea | Relevance to classifier data & hardening |
+|--------|------------|-----------|------------------------------------------|
+| **Auto-RT** | arXiv:2501.01830; ICLR 2026 poster line | **RL** framework for automatic *jailbreak strategy* exploration. Early-terminated exploration + progressive reward tracking with intermediate “downgrade” models. Reports ~**16.6% higher** ASR and faster detection vs prior methods. | Strategy-level trajectories (not only prompts) → multi-turn detector training; curriculum for hard-neg mining |
+| **AutoRedTeamer** | arXiv:2503.15754 (Zhou, Wu, Pinto, … Li); NeurIPS 2025 poster track | Fully automated **end-to-end** multi-agent red team: red-teaming agent + **strategy proposer** that reads research and implements new attacks; **memory-guided** lifelong attack integration. ~**+20% ASR** on HarmBench (Llama-3.1-70B) with **~46% less compute**. | Closest “productized research agent” pattern; attack memory ≈ lifelong library for data export |
+| **CoP** (Composition of Principles) | NeurIPS 2025 | Agentic orchestration of human-provided red-team **principles** into new strategies | Interpretable tactic ontology for labeled data |
+| **AHA — Agent Hacks Agent** (*Autoresearch for Production-Agent Red-Teaming*) | arXiv:2607.11698 (Mao, Zheng, Wang), Jul 2026; code: GitHub `henrymao2004/Auto-research-red-teaming*` | **Autoresearch** loop against *production agents* (Claude Code, Codex): hypothesis → falsifier → sandboxed attack → reflection → **Vulnerability Concept Graph (VCG)** (claim, enabling condition, transfer prediction, evidence). Frozen VCG beats discovery baselines by **+14.2 pp** single-shot; concepts transfer across scenarios/channels. | Artifact is *reusable vulnerability knowledge*, not just prompts—gold for agent-safety classifiers and patch validation |
+| **Jailbreak-autoresearch** | open research loops (e.g. evolutionary header/footer search, multi-model scoring) | Greedy ratchet: edit one part, evaluate, keep/revert—inspired by “autoresearch” experiment loops | Cheap continuous data generation for classifiers |
+| **AIC** (Adaptive Instruction Composition) | arXiv:2604.21159, Apr 2026 | Neural Thompson bandit over WildJailbreak query×tactic compositions | Model-specific high-coverage corpora |
+
+**Takeaway for this repo:** chat-LLM canary campaigns (our pipeline phases 0–9) sit in the **PAIR/WildTeaming/BoN** family. The **2026 frontier for production** is shifting to (1) lifelong multi-agent systems like AutoRedTeamer and (2) **agent-vs-agent autoresearch** (AHA) that outputs concept graphs, not only ASR tables. Future work for hardening agents should import VCG-style *enabling conditions* into the four-way training set, not only prompt/response pairs.
+
+### 3.7 Large reasoning models as autonomous red-team agents (2026 shift)
 
 **Nature Communications (Feb 2026)** — *Large reasoning models are autonomous jailbreak agents*:
 
@@ -161,7 +183,7 @@ The attacker no longer needs a custom bandit or GCG GPU loop for many black-box 
 2. **judge reliability**,  
 3. **closed-loop hardening** (immediately train on failures).
 
-### 3.7 Multimodal universal jailbreaks
+### 3.8 Multimodal universal jailbreaks
 
 - **UltraBreak** (ICLR 2026): universal transferable **image** jailbreaks for VLMs; regularize vision-space patterns, optimize semantic text objectives.  
 - **Odysseus** (NDSS 2026 line): commercial multimodal agent jailbreaks (optimization + domain transfer).  
@@ -403,10 +425,17 @@ Already aligned with several SOTA pieces:
 - Pavlova et al., *GOAT*, 2024/ICML 2025 — arXiv:2410.01606  
 - Hagendorff et al., *Large reasoning models are autonomous jailbreak agents*, Nature Communications 2026  
 
+### Lifelong / RL / multi-agent / production-agent autoresearch (2025–2026)
+- Liu, Zhou, et al., **Auto-RT: Automatic Jailbreak Strategy Exploration for Red-Teaming LLMs**, arXiv:2501.01830 (ICLR 2026 track) — RL strategy exploration, early termination, progressive rewards  
+- Zhou, Wu, Pinto, … Li, **AutoRedTeamer: Autonomous Red Teaming with Lifelong Attack Integration**, arXiv:2503.15754 — multi-agent + memory-guided lifelong attacks; +20% HarmBench ASR, −46% compute  
+- Mao, Zheng, Wang, **Agent Hacks Agent: Autoresearch for Production-Agent Red-Teaming (AHA)**, arXiv:2607.11698 (Jul 2026) — vulnerability concept graph for Claude Code / Codex-style agents; code related to `henrymao2004/Auto-research-red-teaming*`  
+- Xiong et al., CoP (Composition of Principles), NeurIPS 2025  
+- Jailbreak-autoresearch evolutionary loops (open research: multi-model scoring, greedy keep/revert)  
+- Industry 2026 guides: continuous automated red teaming for agents (tool abuse, memory, CI)  
+
 ### Compositional data at scale
 - Jiang et al., *WildTeaming at Scale* / WildJailbreak — arXiv:2406.18510; HF `allenai/wildjailbreak`  
 - Zymet et al., *Adaptive Instruction Composition*, Apr 2026 — arXiv:2604.21159  
-- Xiong et al., CoP (Composition of Principles), NeurIPS 2025  
 
 ### Hardening & classifiers
 - Ge et al., MART — arXiv:2311.07689  
