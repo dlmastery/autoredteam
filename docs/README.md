@@ -5,6 +5,7 @@
 | Document | Description |
 |----------|-------------|
 | **[SOTA_AUTO_REDTEAM_JULY_2026.md](SOTA_AUTO_REDTEAM_JULY_2026.md)** | **State-of-the-art survey** (cutoff: end of July 2026) on automatic red teaming, universal/transferable jailbreaks, training data for jailbreak classification, and LLM hardening. Also mirrored at repo root as [`../RESEARCH_SURVEY.md`](../RESEARCH_SURVEY.md). |
+| **[RELATED_WORK_PAPERS.md](RELATED_WORK_PAPERS.md)** | Paper bibliography + name disambiguation (Auto-RT, AutoRedTeamer, AHA/autoresearch, CoP, … vs this local repo). |
 
 ### Survey contents (outline)
 

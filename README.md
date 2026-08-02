@@ -79,9 +79,12 @@ feature-flagged and off by default, so the classic single-attacker loop is the b
 |------|------|
 | **[`RESEARCH_SURVEY.md`](RESEARCH_SURVEY.md)** | **Primary survey** (root, easy to find) |
 | [`docs/SOTA_AUTO_REDTEAM_JULY_2026.md`](docs/SOTA_AUTO_REDTEAM_JULY_2026.md) | Same document under `docs/` |
+| [`docs/RELATED_WORK_PAPERS.md`](docs/RELATED_WORK_PAPERS.md) | **Paper list** + disambiguation (Auto-RT, AutoRedTeamer, AHA, …) |
 | [`docs/README.md`](docs/README.md) | Docs index |
 
-Covers: GCG / PAIR / TAP / Crescendo / GOAT / WildTeaming / AIC / BoN / LRM agents / ReFAT / HASTE / HarmBench / WildJailbreak, plus a recommended closed-loop pipeline for hardening.
+Covers: GCG / PAIR / TAP / Crescendo / GOAT / WildTeaming / AIC / BoN / **Auto-RT** / **AutoRedTeamer** / **AHA (production-agent autoresearch)** / LRM agents / ReFAT / HASTE / HarmBench / WildJailbreak, plus a recommended closed-loop pipeline for hardening.
+
+> **Not the same as public papers:** searching “auto red team” on Google/arXiv finds *AutoRedTeamer*, *Auto-RT*, *AHA/Agent Hacks Agent*, etc. Those are external research systems. **This repo** is the local educational harness (`steeringresearch/auto-redteam` → `autoredteam/`).
 
 ## Docs
 
