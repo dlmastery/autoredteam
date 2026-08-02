@@ -85,31 +85,61 @@ feature-flagged and off by default, so the classic single-attacker loop is the b
 
 Small-model lab exercise: **ablated/uncensored Gemma-4B** attacker vs **official Gemma-4B** defender via Ollama. Generates **100 unique** labelled items (55 regular + 45 universal scaffolds) for jailbreak-classification training. Success = unique canary token emitted (no real harmful payloads).
 
+### Full multi-phase pipeline (recommended)
+
+```text
+0 setup → 1 compose → 2 attack_gen → 3 defend_single → 4 multiturn
+→ 5 universal_bon → 6 judge → 7 hardneg → 8 export → 9 dashboard
+```
+
 ```bash
-# Prerequisites: Ollama running; python3.exe venv with package installed
-# Models pulled automatically on first run (or):
+# Prerequisites: Ollama running; python3.exe venv
 #   ollama pull gemma4:e4b
 #   ollama pull huihui_ai/gemma-4-abliterated:e4b
 
 python3.exe -m pip install -e ".[dev,local]"
-.venv\Scripts\python.exe scripts/run_local_gemma4b_edu.py
 
-# Smoke (3 goals):
-.venv\Scripts\python.exe scripts/run_local_gemma4b_edu.py --limit 3
+# List phases
+.venv\Scripts\python.exe scripts/run_full_pipeline.py --list-phases
+# or:  .venv\Scripts\auto-redteam.exe pipeline --list-phases
 
-# Re-export dataset + dashboard from an existing run:
-.venv\Scripts\python.exe scripts/export_dataset_and_dashboard.py --run-dir runs/local-gemma4b-edu-100
+# Smoke (5 goals, all phases)
+.venv\Scripts\python.exe scripts/run_full_pipeline.py --limit 5 --skip-pull
+
+# Full 100-item educational campaign
+.venv\Scripts\python.exe scripts/run_full_pipeline.py --skip-pull
+
+# Resume / re-export only
+.venv\Scripts\python.exe scripts/run_full_pipeline.py --from-phase export
 ```
+
+| Phase | What it does |
+|-------|----------------|
+| 0 setup | Ensure models, smoke PING/PONG, VRAM unload |
+| 1 compose | Load 100 unique canary goals (regular + universal) |
+| 2 attack_gen | Ablated model rewrites seeds (canary preserved) |
+| 3 defend_single | Official model single-turn answers + rule judge |
+| 4 multiturn | Crescendo + mutation_loop on failures |
+| 5 universal_bon | Best-of-N surface augmentations (universal layer) |
+| 6 judge | Finalize best attempt; optional LLM judge |
+| 7 hardneg | HASTE-lite re-attack remaining hard failures |
+| 8 export | Flat dataset + four-way labels + policy pairs |
+| 9 dashboard | Interactive HTML + report.md/html/csv |
 
 | Output | Path |
 |--------|------|
-| Run artifacts | `runs/local-gemma4b-edu-100/` |
-| Dataset (JSON/JSONL/CSV) | `datasets/edu_100_items.*` |
-| Interactive dashboard | `dashboard/index.html` |
+| Checkpoint | `runs/<campaign>/pipeline/state.json` |
+| Flat dataset | `datasets/edu_100_items.*` |
+| Four-way set | `datasets/edu_four_way.jsonl` |
+| Policy pairs | `datasets/edu_policy_pairs.json` |
+| Dashboard | `dashboard/index.html` |
 | Goals | `config/goals_edu_100.yaml` |
-| Campaign config | `config/campaigns/local_gemma4b_edu.yaml` |
 
-**Latest local run (educational):** ASR ≈ **53%** (53/100 canary hits); regular 38/55, universal 15/45.
+### Legacy two-phase script
+
+```bash
+.venv\Scripts\python.exe scripts/run_local_gemma4b_edu.py --limit 3
+```
 
 ---
 

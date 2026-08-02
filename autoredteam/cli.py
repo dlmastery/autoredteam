@@ -183,6 +183,72 @@ def version() -> None:
     typer.echo(f"auto-redteam {__version__}")
 
 
+@app.command("pipeline")
+def pipeline_cmd(
+    campaign: str = typer.Option(
+        "local-gemma4b-full-pipeline", "--campaign", help="Run directory name under runs/."
+    ),
+    from_phase: Optional[str] = typer.Option(
+        None, "--from-phase", help="Start at this phase (inclusive)."
+    ),
+    to_phase: Optional[str] = typer.Option(
+        None, "--to-phase", help="Stop at this phase (inclusive)."
+    ),
+    only: Optional[list[str]] = typer.Option(
+        None, "--only", help="Run only these phase names (repeatable)."
+    ),
+    limit: Optional[int] = typer.Option(None, "--limit", help="Limit number of goals (smoke)."),
+    skip_pull: bool = typer.Option(False, "--skip-pull"),
+    skip_author: bool = typer.Option(False, "--skip-author"),
+    skip_smoke: bool = typer.Option(False, "--skip-smoke"),
+    force: bool = typer.Option(False, "--force", help="Re-run phases even if checkpointed."),
+    no_resume: bool = typer.Option(False, "--no-resume"),
+    bon_n: int = typer.Option(4, "--bon-n", help="Best-of-N variants per item."),
+    multiturn_max_turns: int = typer.Option(3, "--multiturn-max-turns"),
+    hardneg_rounds: int = typer.Option(2, "--hardneg-rounds"),
+    llm_judge: bool = typer.Option(False, "--llm-judge"),
+    seed: int = typer.Option(42, "--seed"),
+    list_phases: bool = typer.Option(False, "--list-phases"),
+) -> None:
+    """Run the full multi-phase educational pipeline (setup → … → dashboard)."""
+    from .pipeline.runner import PHASE_ORDER, run_pipeline
+
+    if list_phases:
+        for i, p in enumerate(PHASE_ORDER):
+            typer.echo(f"  {i}: {p}")
+        return
+
+    from .banner import BANNER
+
+    typer.echo(BANNER)
+    cfg = {
+        "limit": limit,
+        "skip_pull": skip_pull,
+        "skip_author": skip_author,
+        "skip_smoke": skip_smoke,
+        "force": force,
+        "bon_n": bon_n,
+        "multiturn_max_turns": multiturn_max_turns,
+        "hardneg_rounds": hardneg_rounds,
+        "llm_judge": llm_judge,
+        "seed": seed,
+    }
+    try:
+        state = run_pipeline(
+            campaign=campaign,
+            from_phase=from_phase,
+            to_phase=to_phase,
+            only_phases=only,
+            resume=not no_resume,
+            cfg=cfg,
+        )
+    except Exception as exc:
+        typer.secho(f"pipeline failed: {exc}", fg=typer.colors.RED, err=True)
+        raise typer.Exit(code=1)
+    n_ok = sum(1 for it in state.items if it.final_success or it.success)
+    typer.echo(f"items={len(state.items)} successes={n_ok} phases={state.completed_phases}")
+
+
 # --------------------------------------------------------------------------- #
 # Small local helpers (kept out of the command bodies for readability)         #
 # --------------------------------------------------------------------------- #
