@@ -71,13 +71,26 @@ feature-flagged and off by default, so the classic single-attacker loop is the b
 
 ---
 
+## Research survey (July 2026)
+
+**Full state-of-the-art survey paper/notes** on automatic red teaming, universal jailbreaks, classifier training data, and LLM hardening:
+
+| File | Role |
+|------|------|
+| **[`RESEARCH_SURVEY.md`](RESEARCH_SURVEY.md)** | **Primary survey** (root, easy to find) |
+| [`docs/SOTA_AUTO_REDTEAM_JULY_2026.md`](docs/SOTA_AUTO_REDTEAM_JULY_2026.md) | Same document under `docs/` |
+| [`docs/README.md`](docs/README.md) | Docs index |
+
+Covers: GCG / PAIR / TAP / Crescendo / GOAT / WildTeaming / AIC / BoN / LRM agents / ReFAT / HASTE / HarmBench / WildJailbreak, plus a recommended closed-loop pipeline for hardening.
+
 ## Docs
 
 | Doc | Contents |
 |-----|----------|
+| [`RESEARCH_SURVEY.md`](RESEARCH_SURVEY.md) | **SOTA research survey (July 2026)** |
 | [`ARCHITECTURE.md`](ARCHITECTURE.md) | Component design, protocols, data flow |
-| [`docs/SOTA_AUTO_REDTEAM_JULY_2026.md`](docs/SOTA_AUTO_REDTEAM_JULY_2026.md) | State-of-the-art survey (through July 2026): universal jailbreaks, auto red-team techniques, classifier training data, and LLM hardening |
-| [`dashboard/index.html`](dashboard/index.html) | Educational local Gemma-4B campaign dashboard (100 canary items) |
+| [`docs/README.md`](docs/README.md) | Documentation index |
+| [`dashboard/index.html`](dashboard/index.html) | Educational local Gemma-4B campaign dashboard |
 
 ---
 
