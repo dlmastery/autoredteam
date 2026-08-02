@@ -169,6 +169,9 @@ python3.exe -m pip install -e ".[dev,local]"
 | `research/vcg.py` | AHA Vulnerability Concept Graph | `vcg.json` |
 | `research/autoresearch.py` | AHA loop + Jailbreak-autoresearch | `autoresearch_episodes.json` |
 | `research/strategy_proposer.py` | AutoRedTeamer strategy proposer | `strategy_proposals.json` |
+| `research/cop.py` | CoP Composition of Principles | `cop_stats.json` / compositions |
+| `research/aic.py` | AIC Adaptive Instruction Composition | `aic_stats.json` |
+| `research/production_agent.py` | AHA production-agent sandbox victim | `production_agent_episode.json` |
 
 | Output | Path |
 |--------|------|

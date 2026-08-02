@@ -1188,6 +1188,121 @@ def phase_research(state: PipelineState, cfg: dict[str, Any]) -> PipelineState:
         ollama_util.unload(defender_model, host=host)
         print(f"  live autoresearch ASR={live_summary.get('asr')} n={live_summary.get('n')}")
 
+    # --- CoP: offline compositions over failed items (no LLM) ---
+    cop_summary: dict[str, Any] = {"ran": False}
+    try:
+        from ..research.cop import CompositionOfPrinciples
+
+        failures = [it for it in state.items if not (it.final_success or it.success)]
+        cop = CompositionOfPrinciples(seed=int(cfg.get("seed", 42)))
+        cop_rows: list[dict[str, Any]] = []
+        for it in failures:
+            seed_p = it.seed_prompt or it.attack_prompt or it.goal
+            res = cop.compose(seed_p, it.canary_token or "", k=2)
+            cop.record_outcome(res.principle_ids, success=False, score=float(it.score or 0.0))
+            row = res.to_dict()
+            row["goal_id"] = it.id
+            row["category"] = it.category
+            cop_rows.append(row)
+        cop_blob = cop.to_dict()
+        cop_blob["compositions"] = cop_rows
+        (research_dir / "cop_stats.json").write_text(
+            __import__("json").dumps(cop_blob, ensure_ascii=False, indent=2),
+            encoding="utf-8",
+        )
+        cop_summary = {
+            "ran": True,
+            "n_failures": len(failures),
+            "n_compositions": len(cop_rows),
+            **cop.stats(),
+        }
+        print(f"  cop compositions={len(cop_rows)} over failures")
+    except Exception as exc:  # noqa: BLE001
+        cop_summary = {"ran": False, "error": str(exc)}
+        print(f"  [warn] CoP offline compositions: {exc}")
+
+    # --- AIC: offline tactic recommendations from memory / item stats (no LLM) ---
+    aic_summary: dict[str, Any] = {"ran": False}
+    try:
+        from ..research.aic import AdaptiveInstructionComposer
+
+        aic = AdaptiveInstructionComposer(
+            mode="linucb",
+            seed=int(cfg.get("seed", 42)),
+        )
+        # Credit-assign tactics from template / strategy labels when available
+        for it in state.items:
+            tmpl = (it.template or "").strip().lower()
+            strat = (it.final_strategy or it.strategy or "single_turn").lower()
+            # Map pipeline labels onto AIC catalog arms when possible
+            tactic = "identity"
+            if "json" in tmpl or "json" in strat:
+                tactic = "format_json"
+            elif "xml" in tmpl:
+                tactic = "format_xml"
+            elif "role" in tmpl or "roleplay" in tmpl:
+                tactic = "prefix_role_author"
+            elif "academic" in tmpl:
+                tactic = "prefix_academic"
+            elif "suffix" in tmpl or "universal" in tmpl or "bon" in strat:
+                tactic = "suffix_universal"
+            elif "code" in tmpl or "fence" in tmpl:
+                tactic = "format_code_fence"
+            elif "yaml" in tmpl:
+                tactic = "format_yaml"
+            elif "concise" in tmpl:
+                tactic = "style_concise"
+            elif "step" in tmpl:
+                tactic = "style_step_by_step"
+            success = bool(it.final_success or it.success)
+            score = float(it.final_score or it.score or 0.0)
+            reward = 0.65 * (1.0 if success else 0.0) + 0.35 * score
+            ctx = {
+                "category": it.category,
+                "jailbreak_type": it.jailbreak_type,
+                "template": it.template,
+            }
+            aic.update(tactic, reward, ctx, success=success, meta={"id": it.id})
+
+        # Recommend a tactic per failure category (offline select)
+        fail_cats = sorted(
+            {
+                it.category
+                for it in state.items
+                if not (it.final_success or it.success)
+            }
+        )
+        recommendations: list[dict[str, Any]] = []
+        for cat in fail_cats or ["other"]:
+            ctx = {"category": cat, "jailbreak_type": "regular", "template": ""}
+            chosen = aic.select(ctx)
+            recommendations.append(
+                {
+                    "category": cat,
+                    "recommended_tactic": chosen,
+                    "context": ctx,
+                }
+            )
+        aic_blob = aic.stats()
+        aic_blob["recommendations"] = recommendations
+        aic.save(research_dir / "aic_stats.json")
+        # Re-write with recommendations appended (save() uses stats only)
+        (research_dir / "aic_stats.json").write_text(
+            __import__("json").dumps(aic_blob, ensure_ascii=False, indent=2),
+            encoding="utf-8",
+        )
+        aic_summary = {
+            "ran": True,
+            "n_arms": aic_blob.get("n_arms"),
+            "n_episodes": aic_blob.get("n_episodes"),
+            "n_recommendations": len(recommendations),
+            "top_tactics": aic_blob.get("top_tactics"),
+        }
+        print(f"  aic recommendations={len(recommendations)} top={aic_blob.get('top_tactics', [])[:3]}")
+    except Exception as exc:  # noqa: BLE001
+        aic_summary = {"ran": False, "error": str(exc)}
+        print(f"  [warn] AIC offline recommendations: {exc}")
+
     memory.save(research_dir / "lifelong_memory.json")
     vcg.save(research_dir / "vcg.json")
     explorer.save(research_dir / "auto_rt_stats.json")
@@ -1200,12 +1315,16 @@ def phase_research(state: PipelineState, cfg: dict[str, Any]) -> PipelineState:
         "vcg": vcg.stats(),
         "auto_rt": explorer.stats(),
         "n_proposals": len(proposals),
+        "cop": cop_summary,
+        "aic": aic_summary,
         "live": live_summary,
         "inspired_by": [
             "AutoRedTeamer arXiv:2503.15754",
             "Auto-RT arXiv:2501.01830",
             "AHA arXiv:2607.11698",
             "Jailbreak-autoresearch keep/revert",
+            "CoP Composition of Principles (NeurIPS 2025)",
+            "AIC Adaptive Instruction Composition arXiv:2604.21159",
         ],
     }
     (research_dir / "research_summary.json").write_text(
@@ -1216,6 +1335,8 @@ def phase_research(state: PipelineState, cfg: dict[str, Any]) -> PipelineState:
     state.meta["research_summary"] = {
         "memory_n": memory.stats()["n_records"],
         "vcg_confirmed": vcg.stats()["n_confirmed"],
+        "cop": cop_summary.get("ran", False),
+        "aic": aic_summary.get("ran", False),
         "live": live_summary.get("ran", False),
     }
     state.mark_phase(
@@ -1223,6 +1344,8 @@ def phase_research(state: PipelineState, cfg: dict[str, Any]) -> PipelineState:
         memory_n=memory.stats()["n_records"],
         vcg_confirmed=vcg.stats()["n_confirmed"],
         proposals=len(proposals),
+        cop=bool(cop_summary.get("ran")),
+        aic=bool(aic_summary.get("ran")),
         live=bool(live_summary.get("ran")),
     )
     print(f"  research assets -> {research_dir}")

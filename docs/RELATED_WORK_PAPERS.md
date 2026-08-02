@@ -96,21 +96,32 @@ For the full narrative survey, see [SOTA_AUTO_REDTEAM_JULY_2026.md](SOTA_AUTO_RE
 | AutoRedTeamer strategy proposer | `StrategyProposer` | `autoredteam/research/strategy_proposer.py` |
 | AHA VCG (claim, enabling condition, falsifier, transfer) | `VulnerabilityConceptGraph` | `autoredteam/research/vcg.py` |
 | AHA discovery + Jailbreak-autoresearch keep/revert | `AutoresearchLoop`, `KeepRevertLoop` | `autoredteam/research/autoresearch.py` |
-| Pipeline integration | phase **research** (10) | `autoredteam/pipeline/phases.py` |
+| AHA production-agent sandbox victim (tool FS + canary policy) | `ProductionAgentVictim`, `ProductionAgentHarness`, `SandboxFS`, `run_attack` | `autoredteam/research/production_agent.py` |
+| CoP Composition of Principles | `CompositionOfPrinciples` (`CoP`), `Principle`, `CompositionResult` | `autoredteam/research/cop.py` |
+| AIC Adaptive Instruction Composition bandit | `AdaptiveInstructionComposer` (`AIC`), `Tactic`, educational tactic catalog | `autoredteam/research/aic.py` |
+| Pipeline integration | phase **research** (10): memory + VCG + Auto-RT + offline CoP/AIC | `autoredteam/pipeline/phases.py` |
 | CLI / scripts | `auto-redteam research`, `scripts/run_research_loop.py` | — |
 
-**Run:**
+**Run (Windows):**
 ```bash
 .venv\Scripts\python.exe scripts/run_research_loop.py --from-pipeline runs/local-gemma4b-full-pipeline
 .venv\Scripts\python.exe scripts/run_research_loop.py --mock --limit 10
 .venv\Scripts\python.exe scripts/run_full_pipeline.py --from-phase research
 ```
 
+**Run (Linux / python3):**
+```bash
+python3 scripts/run_research_loop.py --mock --limit 10
+python3 scripts/run_full_pipeline.py --from-phase research
+```
+
+Mock research extras write `cop_stats.json`, `aic_stats.json`, and `production_agent_episode.json` under the run `out` dir. Pipeline phase **research** also exports offline CoP compositions over failures and AIC tactic recommendations (no LLM by default).
+
 | External idea | Future extension |
 |---------------|------------------|
-| AHA production agents (Claude Code / Codex sandbox) | Tool-using victim harness + filesystem contracts |
 | Full Auto-RT multi-model progressive downgrade stack | Optional intermediate judge models |
-| AIC trillion-scale composition bandit | SBERT embeddings over WildJailbreak library |
+| AIC neural / SBERT contextual bandit at WildJailbreak scale | Deeper embeddings over full tactic×query library |
+| Live LLM tool-calling backend for production-agent victim | Wire a real tool-calling provider beyond offline mock |
 
 ---
 
