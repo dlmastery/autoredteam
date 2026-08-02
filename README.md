@@ -141,6 +141,34 @@ python3.exe -m pip install -e ".[dev,local]"
 | 7 hardneg | HASTE-lite re-attack remaining hard failures |
 | 8 export | Flat dataset + four-way labels + policy pairs |
 | 9 dashboard | Interactive HTML + report.md/html/csv |
+| 10 research | **Paper impls:** lifelong memory (AutoRedTeamer), VCG (AHA), Auto-RT, strategy proposer; optional live keep/revert |
+
+### Paper implementations (Auto-RT / AutoRedTeamer / AHA)
+
+```bash
+# Build research assets from a finished pipeline campaign
+.venv\Scripts\python.exe scripts/run_research_loop.py --from-pipeline runs/local-gemma4b-full-pipeline
+
+# Offline mock autoresearch (keep/revert + VCG)
+.venv\Scripts\python.exe scripts/run_research_loop.py --mock --limit 10
+
+# Live canary loop vs local Gemma defender
+.venv\Scripts\python.exe scripts/run_research_loop.py --live --limit 5 --skip-pull
+
+# Pipeline phase 10 only (after a full run exists)
+.venv\Scripts\python.exe scripts/run_full_pipeline.py --from-phase research --campaign local-gemma4b-full-pipeline
+
+# CLI
+.venv\Scripts\auto-redteam.exe research --from-pipeline runs/local-gemma4b-full-pipeline
+```
+
+| Module | Paper | Output |
+|--------|-------|--------|
+| `research/memory.py` | AutoRedTeamer lifelong integration | `lifelong_memory.json` |
+| `research/auto_rt.py` | Auto-RT strategy RL | `auto_rt_stats.json` |
+| `research/vcg.py` | AHA Vulnerability Concept Graph | `vcg.json` |
+| `research/autoresearch.py` | AHA loop + Jailbreak-autoresearch | `autoresearch_episodes.json` |
+| `research/strategy_proposer.py` | AutoRedTeamer strategy proposer | `strategy_proposals.json` |
 
 | Output | Path |
 |--------|------|
@@ -148,6 +176,7 @@ python3.exe -m pip install -e ".[dev,local]"
 | Flat dataset | `datasets/edu_100_items.*` |
 | Four-way set | `datasets/edu_four_way.jsonl` |
 | Policy pairs | `datasets/edu_policy_pairs.json` |
+| Research assets | `runs/<campaign>/research/` |
 | Dashboard | `dashboard/index.html` |
 | Goals | `config/goals_edu_100.yaml` |
 

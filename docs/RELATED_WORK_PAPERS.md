@@ -87,15 +87,30 @@ For the full narrative survey, see [SOTA_AUTO_REDTEAM_JULY_2026.md](SOTA_AUTO_RE
 
 ---
 
-## How this maps to our pipeline (phases 0–9)
+## How this maps to our **implemented** code
 
-| External idea | Our implementation (today) | Next step if we grow the project |
-|---------------|----------------------------|----------------------------------|
-| Auto-RT strategy RL | Thompson bandit over fixed strategies | Expand strategy space; learn over compositions |
-| AutoRedTeamer lifelong memory | `persist_stats` + hardneg library | Strategy proposer agent + research-ingest |
-| AHA VCG / production agents | Chat canary goals only | Sandboxed tool-using victim + concept graph export |
-| Jailbreak-autoresearch loop | Phase loop with checkpoint keep/revert | Tighter single-edit mutation + multi-scorer |
-| AIC | Phase 1 goals + bandit selection hooks | Full WildJailbreak compose bandit |
+| External idea | Implementation in this repo | Path |
+|---------------|----------------------------|------|
+| Auto-RT strategy RL + early stop + progressive reward | `AutoRTExplorer`, `ProgressiveRewardTracker` | `autoredteam/research/auto_rt.py` |
+| AutoRedTeamer lifelong attack memory | `LifelongAttackMemory` | `autoredteam/research/memory.py` |
+| AutoRedTeamer strategy proposer | `StrategyProposer` | `autoredteam/research/strategy_proposer.py` |
+| AHA VCG (claim, enabling condition, falsifier, transfer) | `VulnerabilityConceptGraph` | `autoredteam/research/vcg.py` |
+| AHA discovery + Jailbreak-autoresearch keep/revert | `AutoresearchLoop`, `KeepRevertLoop` | `autoredteam/research/autoresearch.py` |
+| Pipeline integration | phase **research** (10) | `autoredteam/pipeline/phases.py` |
+| CLI / scripts | `auto-redteam research`, `scripts/run_research_loop.py` | — |
+
+**Run:**
+```bash
+.venv\Scripts\python.exe scripts/run_research_loop.py --from-pipeline runs/local-gemma4b-full-pipeline
+.venv\Scripts\python.exe scripts/run_research_loop.py --mock --limit 10
+.venv\Scripts\python.exe scripts/run_full_pipeline.py --from-phase research
+```
+
+| External idea | Future extension |
+|---------------|------------------|
+| AHA production agents (Claude Code / Codex sandbox) | Tool-using victim harness + filesystem contracts |
+| Full Auto-RT multi-model progressive downgrade stack | Optional intermediate judge models |
+| AIC trillion-scale composition bandit | SBERT embeddings over WildJailbreak library |
 
 ---
 

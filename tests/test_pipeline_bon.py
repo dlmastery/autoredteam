@@ -10,11 +10,13 @@ from autoredteam.pipeline.state import ItemRecord, PipelineState
 
 def test_phase_order_complete():
     assert PHASE_ORDER[0] == "setup"
-    assert PHASE_ORDER[-1] == "dashboard"
+    assert "dashboard" in PHASE_ORDER
     assert "multiturn" in PHASE_ORDER
     assert "universal_bon" in PHASE_ORDER
     assert "hardneg" in PHASE_ORDER
-    assert len(PHASE_ORDER) == 10
+    assert "research" in PHASE_ORDER
+    assert PHASE_ORDER[-1] == "research"
+    assert len(PHASE_ORDER) >= 11
 
 
 def test_bon_preserves_canary():

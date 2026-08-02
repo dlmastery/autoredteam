@@ -249,6 +249,46 @@ def pipeline_cmd(
     typer.echo(f"items={len(state.items)} successes={n_ok} phases={state.completed_phases}")
 
 
+@app.command("research")
+def research_cmd(
+    from_pipeline: Optional[str] = typer.Option(
+        None,
+        "--from-pipeline",
+        help="Ingest a finished pipeline campaign dir (builds memory + VCG + Auto-RT).",
+    ),
+    live: bool = typer.Option(False, "--live", help="Also run live keep/revert on failures."),
+    mock: bool = typer.Option(False, "--mock", help="Offline mock defender loop."),
+    limit: Optional[int] = typer.Option(None, "--limit"),
+    seed: int = typer.Option(42, "--seed"),
+    out: Optional[str] = typer.Option(None, "--out", help="Output dir for research assets."),
+) -> None:
+    """Run paper implementations: AutoRedTeamer memory, Auto-RT, AHA VCG, keep/revert."""
+    import subprocess
+    import sys
+    from pathlib import Path
+
+    script = Path(__file__).resolve().parent.parent / "scripts" / "run_research_loop.py"
+    cmd = [sys.executable, str(script)]
+    if from_pipeline:
+        cmd += ["--from-pipeline", from_pipeline]
+        if live:
+            cmd.append("--live")
+        if limit is not None:
+            cmd += ["--limit", str(limit)]
+    else:
+        if mock or not live:
+            cmd.append("--mock")
+        if live:
+            cmd.append("--live")
+        if limit is not None:
+            cmd += ["--limit", str(limit)]
+        if out:
+            cmd += ["--out", out]
+    cmd += ["--seed", str(seed)]
+    typer.echo(f"running: {' '.join(cmd)}")
+    raise typer.Exit(code=subprocess.call(cmd))
+
+
 # --------------------------------------------------------------------------- #
 # Small local helpers (kept out of the command bodies for readability)         #
 # --------------------------------------------------------------------------- #

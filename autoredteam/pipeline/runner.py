@@ -20,6 +20,7 @@ PHASE_ORDER: list[str] = [
     "hardneg",
     "export",
     "dashboard",
+    "research",  # AutoRedTeamer memory + AHA VCG + Auto-RT (paper implementations)
 ]
 
 
@@ -143,6 +144,12 @@ def main(argv: list[str] | None = None) -> None:
     ap.add_argument("--hardneg-rounds", type=int, default=2)
     ap.add_argument("--llm-judge", action="store_true")
     ap.add_argument("--seed", type=int, default=42)
+    ap.add_argument(
+        "--research-live",
+        action="store_true",
+        help="Phase research: also run live keep/revert autoresearch on failures",
+    )
+    ap.add_argument("--research-live-limit", type=int, default=10)
     ap.add_argument("--list-phases", action="store_true")
     args = ap.parse_args(argv)
 
@@ -162,6 +169,8 @@ def main(argv: list[str] | None = None) -> None:
         "hardneg_rounds": args.hardneg_rounds,
         "llm_judge": args.llm_judge,
         "seed": args.seed,
+        "research_live": args.research_live,
+        "research_live_limit": args.research_live_limit,
     }
     run_pipeline(
         campaign=args.campaign,
