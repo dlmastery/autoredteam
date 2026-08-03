@@ -58,8 +58,8 @@ def chat(
     max_tokens: int = 320,
     keep_alive: str = "30m",
     host: str = DEFAULT_HOST,
-    timeout: float = 300,
-    retries: int = 3,
+    timeout: float = 180,
+    retries: int = 2,
 ) -> str:
     import time
     import urllib.error

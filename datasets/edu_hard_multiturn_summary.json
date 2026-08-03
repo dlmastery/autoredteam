@@ -1,0 +1,17 @@
+{
+  "campaign": "local-gemma4b-hard-stealth-mt-partial",
+  "n_trajectories": 20,
+  "n_success": 8,
+  "asr": 0.4,
+  "avg_turns": 14.95,
+  "max_turns": 16,
+  "detectability_bands": {
+    "hard": 20
+  },
+  "inspired_by": [
+    "Crescendo gradualism (arXiv:2404.01833)",
+    "GOAT multi-turn rapport",
+    "Deferred payload / nested verification (hard classifier cases)"
+  ],
+  "educational": true
+}

@@ -141,6 +141,33 @@ def main(argv: list[str] | None = None) -> None:
     ap.add_argument("--no-resume", action="store_true")
     ap.add_argument("--bon-n", type=int, default=4)
     ap.add_argument("--multiturn-max-turns", type=int, default=3)
+    ap.add_argument(
+        "--multiturn-targets",
+        default="failures",
+        choices=["failures", "single_turn_failures", "all"],
+        help="Which items enter multiturn (use single_turn_failures for long re-runs)",
+    )
+    ap.add_argument(
+        "--multiturn-use-attacker",
+        action="store_true",
+        help="Rephrase each multiturn rung with the ablated attacker model",
+    )
+    ap.add_argument(
+        "--no-multiturn-history",
+        action="store_true",
+        help="Disable defender chat history (stateless per turn)",
+    )
+    ap.add_argument(
+        "--dataset-prefix",
+        default="edu",
+        help="Prefix for exported dataset filenames (default: edu)",
+    )
+    ap.add_argument(
+        "--multiturn-limit",
+        type=int,
+        default=None,
+        help="Cap number of items that enter multiturn (for smoke tests)",
+    )
     ap.add_argument("--hardneg-rounds", type=int, default=2)
     ap.add_argument("--llm-judge", action="store_true")
     ap.add_argument("--seed", type=int, default=42)
@@ -166,6 +193,11 @@ def main(argv: list[str] | None = None) -> None:
         "force": args.force,
         "bon_n": args.bon_n,
         "multiturn_max_turns": args.multiturn_max_turns,
+        "multiturn_targets": args.multiturn_targets,
+        "multiturn_use_attacker": args.multiturn_use_attacker,
+        "multiturn_history": not args.no_multiturn_history,
+        "dataset_prefix": args.dataset_prefix,
+        "multiturn_limit": args.multiturn_limit,
         "hardneg_rounds": args.hardneg_rounds,
         "llm_judge": args.llm_judge,
         "seed": args.seed,

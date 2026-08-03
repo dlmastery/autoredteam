@@ -15,6 +15,7 @@ from .base import BaseStrategy
 from .crescendo import CrescendoStrategy
 from .mutation_loop import MutationLoopStrategy
 from .single_turn import SingleTurnStrategy
+from .stealth_multiturn import NestedTaskStrategy, StealthMultiturnStrategy
 from .tree_of_attacks import TreeOfAttacksStrategy
 
 # name -> class. Keys are the stable identifiers used in config + the bandit.
@@ -23,6 +24,8 @@ STRATEGIES: dict[str, type[BaseStrategy]] = {
     CrescendoStrategy.name: CrescendoStrategy,
     MutationLoopStrategy.name: MutationLoopStrategy,
     TreeOfAttacksStrategy.name: TreeOfAttacksStrategy,
+    StealthMultiturnStrategy.name: StealthMultiturnStrategy,
+    NestedTaskStrategy.name: NestedTaskStrategy,
 }
 
 
@@ -54,6 +57,8 @@ __all__ = [
     "CrescendoStrategy",
     "MutationLoopStrategy",
     "TreeOfAttacksStrategy",
+    "StealthMultiturnStrategy",
+    "NestedTaskStrategy",
 ]
 
 
