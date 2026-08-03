@@ -1,12 +1,12 @@
 {
-  "campaign": "local-gemma4b-hard-stealth-mt-partial",
-  "n_trajectories": 20,
-  "n_success": 8,
-  "asr": 0.4,
-  "avg_turns": 14.95,
+  "campaign": "local-gemma4b-hard-stealth-mt",
+  "n_trajectories": 100,
+  "n_success": 34,
+  "asr": 0.34,
+  "avg_turns": 14.97,
   "max_turns": 16,
   "detectability_bands": {
-    "hard": 20
+    "hard": 100
   },
   "inspired_by": [
     "Crescendo gradualism (arXiv:2404.01833)",
